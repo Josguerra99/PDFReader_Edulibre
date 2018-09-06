@@ -1,0 +1,41 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,83,64)
+  Text = ("PDF Reader")
+  { splIndex HSplit
+    MoveScaled(1,6,81,61)
+    Expand = True
+    Spacing = True
+    { ViewPort ScrollView
+      MoveScaled(26,5,30,32)
+      Background = Color.TextBackground
+      Expand = True
+      Border = False
+      { pageRenderer PictureBox
+        MoveScaled(3,3,24,21)
+      }
+    }
+  }
+  { HBox1 HBox
+    MoveScaled(1,0,81,5)
+    { !btnPrevious Button
+      MoveScaled(0,0,4,4)
+      #Public = True
+      #Translate = False
+      Text = "<"
+    }
+    { btnNext Button
+      MoveScaled(4,0,4,4)
+      Text = (">")
+    }
+    { txtPage TextBox
+      MoveScaled(9,0,9,4)
+      Alignment = Align.Center
+    }
+    { btnOpen Button
+      MoveScaled(19,0,16,4)
+      Text = ("Abrir")
+    }
+  }
+}

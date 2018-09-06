@@ -1,0 +1,60 @@
+' Gambas class file
+
+Property Read CurrentPage As Integer 'Pagina Actual
+Property Read PageImg As Picture 'Image Actual
+Property Read IsEmpty As Boolean 'Si se logro abrir el pdf(false es que no hay ningun pdf abierto)
+Property Read Name As String 'Nombre del pdf
+
+Private m_dir As String
+Private m_pdf As New PdfDocument
+Private m_currentPage As Integer
+Private m_picture As Picture
+
+Public Sub Init(dir As String)
+  m_dir = dir
+  'Abrir pdf si no se abre por algun error entonces se pone como nulo
+  m_pdf.Open(dir)
+  Catch
+    m_pdf = Null
+End
+
+'''Dibujamos la pagina del pdf actual
+Public Sub LoadPage(page As Integer)
+  'Si no hay pdf abierto retornamos
+  If (Me.IsEmpty) Then
+    Return
+  Endif
+  'Si la pagina no esta en el rango no hacemos nada
+  If (page > m_pdf.Count Or page < 1) Then
+    Return    
+  Endif
+  'Cambiamos el numero de pagina actual
+  m_currentPage = page  
+  'Se obtiene la pagina del pdf
+  m_picture = m_pdf[m_currentPage].Image.Picture
+End
+
+Public Sub Close()
+  If Not Me.IsEmpty Then
+    m_pdf.Close()  
+  Endif
+End
+
+'Implementacion de las propiedades
+Private Function CurrentPage_Read() As Integer
+  Return m_currentPage 
+End
+
+Private Function PageImg_Read() As Picture 
+  Return m_picture
+End
+
+Private Function IsEmpty_Read() As Boolean
+  Return IsNull(m_pdf) 
+End
+
+Private Function Name_Read() As String
+  Dim name As String[]
+  name = Split(m_dir, "/")
+  Return name[name.Count - 1]  
+End
