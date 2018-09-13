@@ -1,21 +1,63 @@
 ' Gambas class file
 
-Public pdf As PDF
+Private pdf As PDF
+Private currentZoom As Float
+Private Const minZoom As Float = 0.25
+Private Const maxZoom As Float = 5
+Private scrollableViewport As New ScrollableViewport
+Private ScrollXPositionBeforeZoom As Float 'Porcentaje de la posicion de la barra de scroll x
+Private ScrollYPositionBeforeZoom As Float 'Porcentaje de la posicion de la barra de scroll y
+Private guiHandler As New GUIEventHandler
 
-Public Sub OpenPdf()
+Public Sub Init(Optional initialDir As String = Null)
+  UpdateLayout()
+  zoomSlider.MinValue = minZoom * 100
+  zoomSlider.MaxValue = maxZoom * 100
+  zoomSlider.Step = 0.05 * 100
+  SetZoom(1)
+  scrollableViewport.ViewPort = ViewPort
+  scrollableViewport.Init()
+  guiHandler.AddEvents()
+  
+  If Not IsNull(initialDir) Then
+    OpenPdf(initialDir)
+  Endif
+
+End
+Public Sub Exit()
+  If Not IsNull(pdf) Then
+    pdf.Close()
+  Endif  
+End
+
+
+
+Public Sub ClearUI() 'Quita los elementos si no hay un pdf abierto
+  pageRenderer.Picture = Null
+  pageRenderer.Resize(0, 0)
+  txtPage.Text = ""     
+  FMain.Text = "PDF Reader"
+End
+
+Public Sub OpenDialogPath()
   'Se abre una ventana que servira para buscar el archivo pdf que se quiere abrir
   Dialog.Title = "Abrir PDF"
   Dialog.Filter = ["*.pdf;", "Ficheros PDF"]
   Dialog.Path = "."
   If Dialog.OpenFile() Then Return
+  OpenPdf(Dialog.Path)
+End
+
+Public Sub OpenPdf(dir As String)
   'Se abre el pdf
   'Si habia uno abierto anteriormente lo cerramos
   If Not IsNull(pdf) Then
     pdf.Close()  
   Endif
-  'Luego de eso ya podemos abrir un nuevo pdf
+  
+  'Intentamos abrir el pdf
   pdf = New PDF
-  pdf.Init(Dialog.Path)
+  pdf.Init(dir)
   
   'Si no se logro abrir bien el pdf entonces lo ponemos como nulo
   If pdf.IsEmpty Then
@@ -25,8 +67,11 @@ Public Sub OpenPdf()
   Endif
   
   'Dibujamos la primera pagina
+  pdf.Zoom = 1
   DrawPage(1)
+  SetZoom(1)
   FMain.Text = pdf.Name
+  
 End
 
 Public Sub DrawPage(page As Integer)
@@ -34,23 +79,47 @@ Public Sub DrawPage(page As Integer)
   If IsNull(pdf) Then
     Return    
   Endif
+  
+  
+  ScrollXPositionBeforeZoom = ViewPort.ScrollX / ViewPort.ScrollWidth 
+  ScrollYPositionBeforeZoom = ViewPort.ScrollY / ViewPort.ScrollHeight
   'Se carga la pagina a mostrar y luego se muestra y se cambia el numero de pagina
+  pdf.Zoom = currentZoom
   pdf.LoadPage(page)
   txtPage.Text = pdf.CurrentPage
   pageRenderer.Picture = pdf.PageImg
   pageRenderer.Resize(pdf.PageImg.Width, pdf.PageImg.Height)  
   'Actualizamos el layout
-   Form_Resize()
+   UpdateLayout()
+End
+Public Sub SetZoom(zoom As Float) 'Actualiza el zoom sin volver a renderizar la pagina (sicnroniza el slider con el txt y actualiza el valor de current zoom)
+  'Sincronizar txt con slider
+  'Comprobar que este en el rango
+  If zoom >= minZoom And zoom <= maxZoom Then
+    currentZoom = zoom
+  Endif  
+  'Sincronizar los valores
+  zoomSlider.Value = currentZoom * 100
+  zoomTxt.Text = currentZoom * 100  
+
+ End
+Public Sub UpdateZoomRender(zoom As Float) 'Actualiza el zoom y despues vuelve a dibujar la pagina actual con el nuevo zoom
+  SetZoom(zoom)
+  'Si no se a abierto algun pdf
+  If IsNull(pdf) Then
+    Return
+  Endif
+  
+  DrawPage(pdf.CurrentPage)  
 End
 
-Public Sub GoNext()
+Public Sub GoNext() 'Siguiente pagina
   If IsNull(pdf) Then
     Return    
   Endif
   DrawPage(pdf.CurrentPage + 1)
 End
-
-Public Sub GoPrevious()
+Public Sub GoPrevious() 'Pagina anterior
   If IsNull(pdf) Then
     Return    
   Endif
@@ -58,7 +127,7 @@ Public Sub GoPrevious()
 End
 
 
-Public Sub GoToTxtPage()
+Public Sub GoToTxtPage() 'Ir a la pagina que tiene el txt
   DrawPage(CInt(txtPage.Text))
   Catch
     Print "No se puede ir a la pagina " & txtPage.Text
@@ -67,42 +136,29 @@ Public Sub GoToTxtPage()
     Endif
 End
 
-Public Sub btnOpen_Click() 
-  OpenPdf()  
-End
-Public Sub btnNext_Click() 
-  GoNext()
-End
-Public Sub btnPrevious_Click() 
-  GoPrevious()
-End
 
-Public Sub txtPage_KeyPress()
-  If Key.Code == Key.Enter Or Key.Code == Key.Return Then
-    GoToTxtPage()
-  Endif    
-End
-
-Public Sub Form_Close()
-  If Not IsNull(pdf) Then
-    pdf.Close()
-  Endif  
-End
-
-
-Public Sub ClearUI() 'Quita los elementos si no hay un pdf abierto
-pageRenderer.Picture = Null
-pageRenderer.Resize(0, 0)
-txtPage.Text = ""     
-FMain.Text = "PDF Reader"
-End
-
-
-Public Sub Form_Resize() 'Actualizar layout
+Public Sub UpdateLayout() 'Actualizar layout
   'Tamaño sra ancho del formulario menos el 10% de ese ancho y la altura es el 95% del alto del formulario menos la posicion vertical
   splIndex.Resize(FMain.Width - FMain.Width * 0.1, FMain.Height * 0.95 - splIndex.Y)
   'Se cambia la posicion en x para centrarlo que seria el 5% del ancho del formulario
   splIndex.X = FMain.Width * 0.05
-  'Ahora se centra la imagen
-  pageRenderer.X = pageRenderer.Parent.Width / 2 - pageRenderer.Width / 2   
+  'Se actualiza la posicion del scroll bar
+  ViewPort.ScrollX = ScrollXPositionBeforeZoom * ViewPort.ScrollWidth
+  ViewPort.Scrolly = ScrollYPositionBeforeZoom * ViewPort.ScrollHeight
+  'Ahora ponemos la posicion de la image, si no esta con scroll bar x se centra si no se pone en 0
+  If (ViewPort.ClientWidth >= ViewPort.ScrollWidth) Then
+    pageRenderer.X = pageRenderer.Parent.Width / 2 - pageRenderer.Width / 2   
+  Else
+    pageRenderer.X = 0
+  Endif  
+End
+
+Public Sub Form_Open()
+  Init()
+End
+Public Sub Form_Close()
+  Exit()
+End
+Public Sub Form_Resize()
+  UpdateLayout()
 End

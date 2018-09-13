@@ -25,17 +25,31 @@
       #Translate = False
       Text = "<"
     }
-    { btnNext Button
-      MoveScaled(4,0,4,4)
-      Text = (">")
-    }
-    { txtPage TextBox
-      MoveScaled(9,0,9,4)
+    { !txtPage TextBox
+      MoveScaled(4,0,9,4)
+      #Public = True
       Alignment = Align.Center
     }
-    { btnOpen Button
-      MoveScaled(19,0,16,4)
+    { !btnNext Button
+      MoveScaled(13,0,4,4)
+      #Public = True
+      Text = (">")
+    }
+    { !btnOpen Button
+      MoveScaled(23,0,16,4)
+      #Public = True
       Text = ("Abrir")
+    }
+    { Separator1 Separator
+      MoveScaled(36,0,1,4)
+    }
+    { !zoomSlider Slider
+      MoveScaled(41,0,24,4)
+      #Public = True
+    }
+    { !zoomTxt TextBox
+      MoveScaled(66,0,7,4)
+      #Public = True
     }
   }
 }

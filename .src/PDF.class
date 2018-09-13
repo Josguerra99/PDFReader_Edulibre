@@ -4,16 +4,19 @@ Property Read CurrentPage As Integer 'Pagina Actual
 Property Read PageImg As Picture 'Image Actual
 Property Read IsEmpty As Boolean 'Si se logro abrir el pdf(false es que no hay ningun pdf abierto)
 Property Read Name As String 'Nombre del pdf
+Property Zoom As Float 'Zoom actual del documento
 
 Private m_dir As String
 Private m_pdf As New PdfDocument
 Private m_currentPage As Integer
 Private m_picture As Picture
+Private m_zoom As Float
 
-Public Sub Init(dir As String)
+Public Sub Init(dir As String, Optional zoom As Float = 1.0)
   m_dir = dir
   'Abrir pdf si no se abre por algun error entonces se pone como nulo
   m_pdf.Open(dir)
+  m_zoom = zoom
   Catch
     m_pdf = Null
 End
@@ -28,10 +31,15 @@ Public Sub LoadPage(page As Integer)
   If (page > m_pdf.Count Or page < 1) Then
     Return    
   Endif
+  
+  'Cambiar el zoom que tendra el pdf
+  m_pdf.Zoom = m_zoom
   'Cambiamos el numero de pagina actual
   m_currentPage = page  
+    
   'Se obtiene la pagina del pdf
   m_picture = m_pdf[m_currentPage].Image.Picture
+  
 End
 
 Public Sub Close()
@@ -57,4 +65,12 @@ Private Function Name_Read() As String
   Dim name As String[]
   name = Split(m_dir, "/")
   Return name[name.Count - 1]  
+End
+
+Private Function Zoom_Read() As Float
+  Return m_zoom
+End
+
+Private Sub Zoom_Write(Value As Float)  
+  m_zoom = Value
 End

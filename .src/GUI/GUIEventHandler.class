@@ -1,1 +1,56 @@
 ' Gambas class file
+
+Public NextPageButton As Button
+Public PreviousPageButton As Button
+Public PageTxt As TextBox
+Public OpenButton As Button
+Public ZoomSlider As Slider
+Public ZoomTxt As TextBox
+
+Public Sub AddEvents()
+  Object.Attach(FMain.btnNext, Me, "Next")
+  Object.Attach(FMain.btnPrevious, Me, "Previous")
+  Object.Attach(FMain.txtPage, Me, "PageTxt")
+  Object.Attach(FMain.btnOpen, Me, "Open")
+  Object.Attach(FMain.ZoomSlider, Me, "ZoomSlider")
+  Object.Attach(FMain.ZoomTxt, Me, "ZoomTxt")
+End
+
+Public Sub Open_Click() 
+  FMain.OpenDialogPath()  
+End
+Public Sub Next_Click() 
+  FMain.GoNext()
+End
+Public Sub Previous_Click() 
+  FMain.GoPrevious()
+End
+
+Public Sub PageTxt_KeyPress()
+  If Key.Code == Key.Enter Or Key.Code == Key.Return Then
+    FMain.GoToTxtPage()
+  Endif    
+End
+
+Public Sub ZoomSlider_Change()  
+   FMain.UpdateZoomRender(FMain.zoomSlider.Value / 100)
+End
+
+
+Public Sub ZoomTxt_KeyPress()
+  If Key.Code == Key.Enter Or Key.Code == Key.Return Then
+    FMain.UpdateZoomRender(CInt(FMain.zoomTxt.Text) / 100) 
+  Endif    
+  Catch
+    Print ("No se puede hacer un zoom con valor: " & zoomTxt.Text)
+    FMain.SetZoom(FMain.currentZoom)
+End
+
+
+
+
+
+
+
+
+
