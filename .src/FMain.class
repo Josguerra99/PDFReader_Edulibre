@@ -36,7 +36,7 @@ Public Sub ClearUI() 'Quita los elementos si no hay un pdf abierto
   pageRenderer.Picture = Null
   pageRenderer.Resize(0, 0)
   txtPage.Text = ""     
-  FMain.Text = "PDF Reader"
+  FMain.Text = "PDF Viewer"
 End
 
 Public Sub OpenDialogPath()
@@ -113,6 +113,17 @@ Public Sub UpdateZoomRender(zoom As Float) 'Actualiza el zoom y despues vuelve a
   DrawPage(pdf.CurrentPage)  
 End
 
+
+Public Sub Rotate(Optional direction As Integer = 1)
+  'Si no se a abierto algun pdf
+  If IsNull(pdf) Then
+    Return
+  Endif
+  pdf.Rotate(direction)
+  DrawPage(pdf.CurrentPage)  
+End
+
+
 Public Sub GoNext() 'Siguiente pagina
   If IsNull(pdf) Then
     Return    
@@ -125,7 +136,6 @@ Public Sub GoPrevious() 'Pagina anterior
   Endif
   DrawPage(pdf.CurrentPage - 1)    
 End
-
 
 Public Sub GoToTxtPage() 'Ir a la pagina que tiene el txt
   DrawPage(CInt(txtPage.Text))

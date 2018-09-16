@@ -1,10 +1,10 @@
 # Gambas Form File 3.0
 
 { Form Form
-  MoveScaled(0,0,83,64)
+  MoveScaled(0,0,106,64)
   Text = ("PDF Reader")
   { splIndex HSplit
-    MoveScaled(1,6,81,61)
+    MoveScaled(1,6,104,61)
     Expand = True
     Spacing = True
     { ViewPort ScrollView
@@ -18,7 +18,7 @@
     }
   }
   { HBox1 HBox
-    MoveScaled(1,0,81,5)
+    MoveScaled(1,0,104,5)
     { !btnPrevious Button
       MoveScaled(0,0,4,4)
       #Public = True
@@ -50,6 +50,16 @@
     { !zoomTxt TextBox
       MoveScaled(66,0,7,4)
       #Public = True
+    }
+    { !btnRotateLeft Button
+      MoveScaled(76,0,4,4)
+      #Public = True
+      Text = ("<r")
+    }
+    { !btnRotateRight Button
+      MoveScaled(80,0,4,4)
+      #Public = True
+      Text = ("r>")
     }
   }
 }
