@@ -1,0 +1,68 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,106,64)
+  Text = ("PDF Reader")
+  { !splIndex HSplit
+    MoveScaled(1,6,104,61)
+    #Public = True
+    Expand = True
+    Spacing = True
+    { !ViewPort ScrollView
+      MoveScaled(26,5,30,32)
+      #Public = True
+      Background = Color.TextBackground
+      Expand = True
+      Border = False
+      { !pageRenderer PictureBox
+        MoveScaled(3,3,24,21)
+        #Public = True
+      }
+    }
+  }
+  { HBox1 HBox
+    MoveScaled(1,0,104,5)
+    { !btnPrevious Button
+      MoveScaled(0,0,4,4)
+      #Public = True
+      #Translate = False
+      Text = "<"
+    }
+    { !txtPage TextBox
+      MoveScaled(4,0,9,4)
+      #Public = True
+      Alignment = Align.Center
+    }
+    { !btnNext Button
+      MoveScaled(13,0,4,4)
+      #Public = True
+      Text = (">")
+    }
+    { !btnOpen Button
+      MoveScaled(23,0,16,4)
+      #Public = True
+      Text = ("Abrir")
+    }
+    { Separator1 Separator
+      MoveScaled(36,0,1,4)
+    }
+    { !zoomSlider Slider
+      MoveScaled(41,0,24,4)
+      #Public = True
+    }
+    { !zoomTxt TextBox
+      MoveScaled(66,0,7,4)
+      #Public = True
+    }
+    { !btnRotateLeft Button
+      MoveScaled(76,0,4,4)
+      #Public = True
+      Text = ("<r")
+    }
+    { !btnRotateRight Button
+      MoveScaled(80,0,4,4)
+      #Public = True
+      Text = ("r>")
+    }
+  }
+}

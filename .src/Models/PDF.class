@@ -1,0 +1,105 @@
+' Gambas class file
+
+Property Read CurrentPage As Integer 'Pagina Actual
+Property Read PageImg As Picture 'Image Actual
+Property Read IsEmpty As Boolean 'Si se logro abrir el pdf(false es que no hay ningun pdf abierto)
+Property Read Name As String 'Nombre del pdf
+Property Zoom As Float 'Zoom actual del documento
+
+Private m_dir As String
+Private m_pdf As New PdfDocument
+Private m_currentPage As Integer
+Private m_picture As Picture
+Private m_zoom As Float
+Private m_orientation As Integer
+
+Public Sub Init(dir As String, Optional zoom As Float = 1.0)
+  m_dir = dir
+  'Abrir pdf si no se abre por algun error entonces se pone como nulo
+  m_pdf.Open(dir)
+  m_zoom = zoom
+  m_pdf.Orientation = 0
+  Catch
+    m_pdf = Null
+End
+
+'''Cargamos los valores de la pagina del pdf actual
+Public Sub LoadPage(page As Integer)
+  'Si no hay pdf abierto retornamos
+  If (Me.IsEmpty) Then
+    Return
+  Endif
+  'Si la pagina no esta en el rango no hacemos nada
+  If (page > m_pdf.Count Or page < 1) Then
+    Return    
+  Endif
+  
+  'Cambiar el zoom que tendra el pdf
+  m_pdf.Zoom = m_zoom
+  'Cambiamos el numero de pagina actual
+  m_currentPage = page  
+    
+  'Se obtiene la pagina del pdf
+  m_picture = m_pdf[m_currentPage].Image.Picture
+  
+End
+
+Public Sub Close()
+  If Not Me.IsEmpty Then
+    m_pdf.Close()  
+  Endif
+End
+
+Public Sub Rotate(directionMultiplier As Integer)
+  
+  'Si no hay pdf abierto retornamos
+  If (Me.IsEmpty) Then
+    Return
+  Endif
+  'Agregar o quitar 90 grados
+  m_orientation = m_orientation + 90 * directionMultiplier 
+  
+  'Hacer comprobaciones para que este en el rango de grados y actue circularmente
+  If m_orientation > 270 Then
+    m_orientation = 0
+  Endif
+  
+  If m_orientation < 0 Then
+    m_orientation = 270
+  Endif 
+  
+  'Girar el pdf 
+  m_pdf.Orientation = m_orientation 
+  Print m_orientation
+  
+End
+
+'Implementacion de las propiedades
+Private Function CurrentPage_Read() As Integer
+  Return m_currentPage 
+End
+
+Private Function PageImg_Read() As Picture 
+  Return m_picture
+End
+
+Private Function IsEmpty_Read() As Boolean
+  Return IsNull(m_pdf) 
+End
+
+Private Function Name_Read() As String
+  Dim name As String[]
+  name = Split(m_dir, "/")
+  Return name[name.Count - 1]  
+End
+
+Private Function Zoom_Read() As Float
+  Return m_zoom
+End
+
+Private Sub Zoom_Write(Value As Float)  
+  m_zoom = Value
+End
+
+
+

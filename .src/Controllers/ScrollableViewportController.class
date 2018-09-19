@@ -1,0 +1,34 @@
+' Gambas class file
+
+Private startMouseX As Float
+Private startMouseY As Float
+Private startScrollX As Float
+Private startScrollY As Float
+Public ViewPort As ScrollView
+
+
+Public Sub Init()
+  Object.Attach(ViewPort.Children[0], Me, "content")  
+End
+
+
+Public Sub content_MouseDrag()
+  Dim x As Float = (Mouse.ScreenX - ViewPort.ScreenX) - startMouseX
+  Dim y As Float = (Mouse.ScreenY - ViewPort.ScreenY) - startMouseY 
+  
+  Dim maxX As Float = ViewPort.ScrollWidth - ViewPort.ClientWidth 'Valor maximo de la barra horizontal
+  Dim maxY As Float = ViewPort.ScrollHeight - ViewPort.ClientHeight 'Valor maximo de la barra vertical
+  Dim xToWidthPercentage As Float = (x / maxX)
+  Dim yToWidthPercentage As Float = (y / maxY)
+  
+  Dim desiredX As Float = (startScrollX - x)
+  Dim desiredY As Float = (startScrollY - y)
+  ViewPort.Scroll(desiredX, desiredY)
+End
+
+Public Sub content_MouseDown()
+  startMouseX = Mouse.ScreenX - ViewPort.ScreenX
+  startMouseY = Mouse.ScreenY - ViewPort.ScreenY
+  startScrollX = ViewPort.ScrollX
+  startScrollY = ViewPort.ScrollY
+End

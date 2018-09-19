@@ -1,0 +1,71 @@
+' Gambas class file
+
+Private Const minZoom As Float = 0.25
+Private Const maxZoom As Float = 5
+Private ScrollXPositionBeforeZoom As Float 'Porcentaje de la posicion de la barra de scroll x
+Private ScrollYPositionBeforeZoom As Float 'Porcentaje de la posicion de la barra de scroll y
+
+Public Sub InitForm()
+  FMain.Show()
+  UpdateLayout()
+  zoomSlider.MinValue = minZoom * 100
+  zoomSlider.MaxValue = maxZoom * 100
+  zoomSlider.Step = 0.05 * 100
+End
+
+Public Sub OpenDialogPath()
+ 
+  'Se abre una ventana que servira para buscar el archivo pdf que se quiere abrir
+  Dialog.Title = "Abrir PDF"
+  Dialog.Filter = ["*.pdf;", "Ficheros PDF"]
+  Dialog.Path = "."
+  If Dialog.OpenFile() Then Return
+  Main.OpenPdf(Dialog.Path)
+
+End
+
+
+Public Sub UpdatePageUI(pdf As PDF)
+  ScrollXPositionBeforeZoom = ViewPort.ScrollX / ViewPort.ScrollWidth 
+  ScrollYPositionBeforeZoom = ViewPort.ScrollY / ViewPort.ScrollHeight
+  'Se carga la pagina a mostrar y luego se muestra y se cambia el numero de pagina
+  txtPage.Text = pdf.CurrentPage
+  pageRenderer.Picture = pdf.PageImg
+  pageRenderer.Resize(pdf.PageImg.Width, pdf.PageImg.Height)  
+  'Actualizamos el layout
+   UpdateLayout() 
+End
+
+
+Private Sub ClearUI() 'Quita los elementos si no hay un pdf abierto
+  pageRenderer.Picture = Null
+  pageRenderer.Resize(0, 0)
+  txtPage.Text = ""     
+  FMain.Text = "PDF Viewer"
+End
+
+Public Sub SetZoomUI(zoom As Float) 'Actualiza el zoom sin volver a renderizar la pagina (sicnroniza el slider con el txt y actualiza el valor de current zoom)
+  'Sincronizar txt con slider
+  zoomSlider.Value = zoom * 100
+  zoomTxt.Text = zoom * 100  
+
+ End
+
+Public Sub UpdateLayout() 'Actualizar layout
+  'Tamaño sra ancho del formulario menos el 10% de ese ancho y la altura es el 95% del alto del formulario menos la posicion vertical
+  splIndex.Resize(FMain.Width - FMain.Width * 0.1, FMain.Height * 0.95 - splIndex.Y)
+  'Se cambia la posicion en x para centrarlo que seria el 5% del ancho del formulario
+  splIndex.X = FMain.Width * 0.05
+  'Se actualiza la posicion del scroll bar
+  ViewPort.ScrollX = ScrollXPositionBeforeZoom * ViewPort.ScrollWidth
+  ViewPort.Scrolly = ScrollYPositionBeforeZoom * ViewPort.ScrollHeight
+  'Ahora ponemos la posicion de la image, si no esta con scroll bar x se centra si no se pone en 0
+  If (ViewPort.ClientWidth >= ViewPort.ScrollWidth) Then
+    pageRenderer.X = pageRenderer.Parent.Width / 2 - pageRenderer.Width / 2   
+  Else
+    pageRenderer.X = 0
+  Endif  
+End
+
+
+
