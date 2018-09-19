@@ -1,5 +1,41 @@
 ' Gambas class file
 
+Public Sub AddEvents()
+  Object.Attach(FMain, Me, "Form")
+  Object.Attach(FMain.pageRenderer, Me, "PDF")
+End
+
+Public Sub OpenEvent()
+  If Key.Code == Key["o"] And If Key.Control Then
+     FMain.OpenDialogPath()
+  Endif 
+End
+
+
+
+
+
+
+Public Sub PDF_KeyPress() 
+  
+  OpenEvent()
+  '-> Pagina siguiente  
+  If Key.Code == Key.Right Then
+     FMain.GoNext()     
+     FMain.ViewPort.SetFocus()
+  Endif
+  '<- Pagina anterior  
+  If Key.Code == Key.Left Then
+     FMain.GoPrevious()
+     FMain.ViewPort.SetFocus()
+  Endif
+  
+  
+  
+  
+  
+End
+
 
 
 

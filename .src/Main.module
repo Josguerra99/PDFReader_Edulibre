@@ -1,0 +1,109 @@
+' Gambas module file
+
+Public pdf As PDF
+
+Private m_scrollableViewport As New ScrollableViewportController
+Private m_guiHandler As New GUIEventHandler
+Private m_keyHandler As New KeyboardEvents
+
+Private Const m_minZoom As Float = 0.25
+Private Const m_maxZoom As Float = 5
+
+Public Sub Main(Optional initialDir As String = Null)
+  'Iniciar el formulario principal
+  FMain.InitForm()
+  'Iniciar clases auxiliares
+  m_guiHandler.AddEvents()
+  m_keyHandler.AddEvents()  
+  m_scrollableViewport.ViewPort = FMain.ViewPort
+  m_scrollableViewport.Init()
+
+  SetZoom(1)
+    
+  'Abrir pdf si se necesita
+  If Not IsNull(initialDir) Then
+    OpenPdf(initialDir)
+  Endif
+ 
+End
+
+
+
+
+Public Sub OpenPdf(dir As String)
+  'Se abre el pdf
+  'Si habia uno abierto anteriormente lo cerramos
+  If Not IsNull(pdf) Then
+    pdf.Close()  
+  Endif
+  
+  'Intentamos abrir el pdf
+  pdf = New PDF
+  pdf.Init(dir)
+  
+  'Si no se logro abrir bien el pdf entonces lo ponemos como nulo
+  If pdf.IsEmpty Then
+    FMain.ClearUI()
+    pdf = Null
+    Return    
+  Endif
+  
+  'Dibujamos la primera pagina
+  UpdateCurrentPage(1)
+  FMain.Text = pdf.Name
+End
+
+Public Sub SetZoom(zoom As Float)
+   'Comprobar que este en el rango
+  If zoom >= m_minZoom And zoom <= m_maxZoom Then
+      FMain.SetZoomUI(zoom)
+      If Not IsNull(Main.pdf) Then
+        pdf.Zoom = zoom
+      Endif
+  Endif  
+End
+
+Public Sub UpdateCurrentPage(page As Integer)
+  'Ver si tenemos un pdf abierto
+  If IsNull(Main.pdf) Then
+    Return    
+  Endif
+  pdf.LoadPage(page)
+  'Actualizar UI
+  FMain.UpdatePageUI(pdf)
+End
+
+Public Sub UpdateZoomRender(zoom As Float) 'Actualiza el zoom y despues vuelve a dibujar la pagina actual con el nuevo zoom
+  SetZoom(zoom) 'Actualizamos los controladores
+  'Si no se a abierto algun pdf
+  If IsNull(pdf) Then
+    Return
+  Endif
+  UpdateCurrentPage(pdf.CurrentPage)  
+End
+
+Public Sub Rotate(Optional direction As Integer = 1)
+  'Si no se a abierto algun pdf
+  If IsNull(pdf) Then
+    Return
+  Endif
+  pdf.Rotate(direction)
+  UpdateCurrentPage(pdf.CurrentPage) 'Redibujar pagina  
+End
+
+
+
+
+Public Sub GoToPage(page As Integer)
+  If IsNull(pdf) Then
+    Return    
+  Endif
+  UpdateCurrentPage(page)
+End
+
+Private Sub Exit()
+  If Not IsNull(pdf) Then
+    pdf.Close()
+  Endif  
+End
+

@@ -1,12 +1,5 @@
 ' Gambas class file
 
-Public NextPageButton As Button
-Public PreviousPageButton As Button
-Public PageTxt As TextBox
-Public OpenButton As Button
-Public ZoomSlider As Slider
-Public ZoomTxt As TextBox
-
 Public Sub AddEvents()
   Object.Attach(FMain.btnNext, Me, "Next")
   Object.Attach(FMain.btnPrevious, Me, "Previous")
@@ -16,44 +9,57 @@ Public Sub AddEvents()
   Object.Attach(FMain.ZoomTxt, Me, "ZoomTxt")
   Object.Attach(FMain.btnRotateLeft, Me, "RotateLeft")
   Object.Attach(FMain.btnRotateRight, Me, "RotateRight")
-  
+  Object.Attach(FMain, Me, "Form")
 End
 
 Public Sub Open_Click() 
   FMain.OpenDialogPath()  
 End
 Public Sub Next_Click() 
-  FMain.GoNext()
+  Main.GoToPage(Main.pdf.CurrentPage + 1)
 End
 Public Sub Previous_Click() 
-  FMain.GoPrevious()
+  Main.GoToPage(Main.pdf.CurrentPage - 1)
 End
 
 Public Sub PageTxt_KeyPress()
   If Key.Code == Key.Enter Or Key.Code == Key.Return Then
-    FMain.GoToTxtPage()
+    Main.GoToPage(CInt(FMain.txtPage.Text))
   Endif    
+  Catch
+    Print "No se puede ir a la pagina " & FMain.txtPage.Text
+    If Not IsNull(Main.pdf) Then
+     FMain.txtPage.Text = pdf.CurrentPage
+    Endif
 End
+
+
 
 Public Sub ZoomSlider_Change()  
-   FMain.UpdateZoomRender(FMain.zoomSlider.Value / 100)
+   Main.UpdateZoomRender(FMain.zoomSlider.Value / 100)
 End
-
 
 Public Sub ZoomTxt_KeyPress()
   If Key.Code == Key.Enter Or Key.Code == Key.Return Then
-    FMain.UpdateZoomRender(CInt(FMain.zoomTxt.Text) / 100) 
+    Main.UpdateZoomRender(CInt(FMain.zoomTxt.Text) / 100) 
   Endif    
   Catch
-    Print ("No se puede hacer un zoom con valor: " & zoomTxt.Text)
-    FMain.SetZoom(FMain.currentZoom)
+    Print "No se puede hacer un zoom con valor: " & FMain.zoomTxt.Text
+    Main.SetZoom(Main.currentZoom)
 End
 
 Public Sub RotateLeft_Click() 
-  FMain.Rotate(-1)  
+  Main.Rotate(-1)  
 End
 Public Sub RotateRight_Click() 
-  FMain.Rotate(1)  
+  Main.Rotate(1)  
+End
+
+Public Sub Form_Close()
+  Main.Exit()
+End
+Public Sub Form_Resize()
+  FMain.UpdateLayout()
 End
 
 
